@@ -1,0 +1,9 @@
+
+{
+  "name": "Gemini WhatsApp Mobile",
+  "description": "A mobile-first WhatsApp clone optimized for Android 5.0+, featuring real-time chat simulations and Gemini AI support.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

@@ -1,0 +1,37 @@
+You are Gemini CLI. I have a React app from Google AI Studio (scientific calculator) with App.tsx and package.json.
+
+
+
+Your job:
+
+
+
+Inside my current folder, set it up as an Expo React Native project called "calculator-app". Do not try to create a new folder outside this one.
+
+
+
+Replace the starter App.tsx with my AI Studio App.tsx.
+
+
+
+Merge dependencies and install them.
+
+
+
+Run "expo prebuild" so I get android/ and ios/ folders.
+
+
+
+Use package name: com.nana.calculator
+
+
+
+Do NOT generate app icons. I will provide my own 1024x1024 icon.
+
+
+
+Verify gradle and AndroidManifest are correct and error-free.
+
+
+
+Stop after confirming the android/ folder is fully ready for Android Studio.
