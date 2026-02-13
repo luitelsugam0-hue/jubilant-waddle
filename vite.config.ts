@@ -6,6 +6,6 @@ export default defineConfig({
     plugins: [react()],
     server: {
         // This line tells Vite to allow your Render URL
-    allowedHosts: True
+    allowedHosts: true
     }
 }) 
