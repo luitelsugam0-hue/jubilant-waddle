@@ -300,7 +300,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className={`h-full w-full overflow-hidden relative ${isDarkMode ? 'dark bg-gray-900' : 'bg-[#f0f2f5]'}`}>
+    <div className={`h-[100svh] w-full overflow-hidden fixed ${isDarkMode ? 'dark bg-gray-900' : 'bg-[#f0f2f5]'}`}>
       {activeCall && (
         <div className="fixed inset-0 z-[100] bg-[#075e54] flex flex-col items-center justify-between text-white p-12 py-20">
           <div className="flex flex-col items-center">
