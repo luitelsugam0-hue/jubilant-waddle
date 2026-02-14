@@ -8,6 +8,7 @@ export interface User {
   twoFactorPin?: string;
   is2FAEnabled?: boolean;
   blockedUserIds?: string[];
+  blockedBy?: string[];
 }
 
 export interface Message {

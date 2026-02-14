@@ -15,11 +15,12 @@ interface ChatWindowProps {
   onAddMember?: (uid: string) => void;
   availableUsers?: User[];
   isDarkMode?: boolean;
+  amIBlocked?: boolean;
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ 
     activeTarget, currentUser, messages, onSendMessage, onBlockUser, 
-    isBlocked, onBack, onStartCall, onAddMember, availableUsers, isDarkMode 
+    isBlocked, amIBlocked, onBack, onStartCall, onAddMember, availableUsers, isDarkMode 
 }) => {
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -36,7 +37,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   const handleSend = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!inputText.trim() || isBlocked) return;
+    if (!inputText.trim() || isBlocked || amIBlocked) return;
     const messageToSend = inputText;
     setInputText('');
     onSendMessage(messageToSend, activeTarget.id);
@@ -96,7 +97,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           <img src={activeTarget.avatar} alt="avatar" className="w-9 h-9 rounded-full border border-white/20" />
           <div className="flex flex-col overflow-hidden max-w-[120px] sm:max-w-none">
             <h2 className="font-medium text-base truncate">{targetName}</h2>
-            <p className="text-[11px] opacity-80 truncate">{isGroup ? `${(activeTarget as Group).members.length} members` : (activeTarget as User).isOnline ? 'online' : 'last seen recently'}</p>
+            <p className="text-[11px] opacity-80 truncate">
+              {isGroup 
+                ? `${(activeTarget as Group).members.length} members` 
+                : amIBlocked 
+                  ? '' 
+                  : (activeTarget as User).isOnline ? 'online' : 'last seen recently'}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-1 sm:gap-3">
@@ -160,12 +167,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         {isTyping && <div className="text-xs italic opacity-40">Gemini is thinking...</div>}
       </div>
 
+      {amIBlocked ? (
+        <footer className={`p-4 text-center text-sm ${isDarkMode ? 'bg-gray-800 text-gray-400' : 'bg-[#f0f2f5] text-gray-500'} border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+          You have been blocked by this contact.
+        </footer>
+      ) : (
       <footer className="bg-[#f0f2f5] dark:bg-gray-800 px-2 py-2 flex items-center gap-2 z-10 border-t border-gray-200 dark:border-gray-700">
         <input type="text" placeholder="Type a message" className="flex-1 bg-white dark:bg-gray-700 py-2 px-4 rounded-full text-sm focus:outline-none dark:text-white" value={inputText} onChange={e => setInputText(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend()}/>
         <button onClick={() => handleSend()} className="bg-[#00a884] text-white p-3 rounded-full shadow-md active:scale-95 transition-transform">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M1.101 21.757L23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z"/></svg>
         </button>
       </footer>
+      )}
     </div>
   );
 };

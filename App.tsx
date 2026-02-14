@@ -290,6 +290,35 @@ const App: React.FC = () => {
     });
   };
 
+  const handleToggleBlock = (targetId: string) => {
+    if (!currentUser) return;
+    const isBlocked = currentUser.blockedUserIds?.includes(targetId);
+    
+    // 1. Update Current User (Blocker)
+    const updatedBlockedUserIds = isBlocked 
+      ? (currentUser.blockedUserIds || []).filter(id => id !== targetId)
+      : [...(currentUser.blockedUserIds || []), targetId];
+      
+    const newCurrentUser = { ...currentUser, blockedUserIds: updatedBlockedUserIds };
+    
+    // 2. Update All Users (persist to localStorage)
+    const newAllUsers = allUsers.map(u => {
+      if (u.id === currentUser.id) return newCurrentUser;
+      if (u.id === targetId) {
+        const currentBlockedBy = u.blockedBy || [];
+        const updatedBlockedBy = isBlocked
+          ? currentBlockedBy.filter(id => id !== currentUser.id)
+          : [...currentBlockedBy, currentUser.id];
+        return { ...u, blockedBy: updatedBlockedBy };
+      }
+      return u;
+    });
+
+    setCurrentUser(newCurrentUser);
+    setAllUsers(newAllUsers);
+    localStorage.setItem('wa_clone_users', JSON.stringify(newAllUsers));
+  };
+
   // 5. Conditional Return (Must be after ALL hooks)
   if (!currentUser) {
     return (
@@ -350,18 +379,25 @@ const App: React.FC = () => {
 
         <div className={`h-full flex-1 relative transition-all duration-300 ${activeChatId ? 'flex' : 'hidden md:flex'}`}>
           {activeChatId && activeTarget ? (
-            <ChatWindow 
-              activeTarget={activeTarget as any} currentUser={currentUser}
-              messages={messages.filter(m => 
-                (activeChatId.startsWith('group_') && m.receiverId === activeChatId) ||
-                (!activeChatId.startsWith('group_') && ((m.senderId === currentUser.id && m.receiverId === activeChatId) || (m.senderId === activeChatId && m.receiverId === currentUser.id)))
-              )}
-              onSendMessage={handleSendMessage} onBlockUser={id => handleUpdateProfile({...currentUser, blockedUserIds: [...(currentUser.blockedUserIds || []), id]})}
-              isBlocked={currentUser.blockedUserIds?.includes(activeChatId)} onBack={() => setActiveChatId(null)} onStartCall={handleStartCall}
-              onAddMember={(uid) => handleAddMemberToGroup(activeChatId, uid)}
-              availableUsers={allUsers.filter(u => u.id !== currentUser.id)}
-              isDarkMode={isDarkMode}
-            />
+            (() => {
+              const currentUserData = allUsers.find(u => u.id === currentUser.id) || currentUser;
+              return (
+                <ChatWindow 
+                  activeTarget={activeTarget as any} currentUser={currentUser}
+                  messages={messages.filter(m => 
+                    (activeChatId.startsWith('group_') && m.receiverId === activeChatId) ||
+                    (!activeChatId.startsWith('group_') && ((m.senderId === currentUser.id && m.receiverId === activeChatId) || (m.senderId === activeChatId && m.receiverId === currentUser.id)))
+                  )}
+                  onSendMessage={handleSendMessage} onBlockUser={handleToggleBlock}
+                  isBlocked={currentUserData.blockedUserIds?.includes(activeChatId)} 
+                  amIBlocked={currentUserData.blockedBy?.includes(activeChatId)}
+                  onBack={() => setActiveChatId(null)} onStartCall={handleStartCall}
+                  onAddMember={(uid) => handleAddMemberToGroup(activeChatId, uid)}
+                  availableUsers={allUsers.filter(u => u.id !== currentUser.id)}
+                  isDarkMode={isDarkMode}
+                />
+              );
+            })()
           ) : (
             <div className={`hidden md:flex flex-col items-center justify-center h-full w-full text-center p-10 ${isDarkMode ? 'bg-gray-900' : 'bg-[#f8f9fa]'}`}>
               <div className="w-48 h-48 mb-6 opacity-20"><svg viewBox="0 0 512 512" fill="none"><circle cx="256" cy="256" r="256" fill="#00a884"/><path d="M124 124H388V388H124V124Z" fill="white"/></svg></div>
